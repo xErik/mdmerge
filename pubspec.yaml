@@ -1,7 +1,8 @@
 name: mdmerge
-description: Include text files in markdown files
-version: 1.0.0
+description: Use placeholders in markdown files to include other markdown, text or source files.
+version: 1.0.0+1
 repository: https://github.com/xErik/mdmerge
+issues: https://github.com/xErik/mdmerge/issues
 
 environment:
   sdk: ^3.1.2

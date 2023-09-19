@@ -1,12 +1,14 @@
-Include text files in markdown files.
+Use placeholders in markdown files to include other markdown, text or source files.
 
 This is a command line application, detecting include patterns in `.md` files and replacing the content accordingly. 
 
-Paths may be relative to the current `.md` file or reference the current working directory.
+Paths may be relative to the current `.md` file or reference the current working directory:
 
+```md
 [include:child.md]
 
 [include:./example/example.dart]
+```
 
 # Installation 
 
