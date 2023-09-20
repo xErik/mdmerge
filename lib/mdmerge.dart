@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
+/// Helper class
 class MergeCommand extends Command {
   @override
   final name = "include";
@@ -9,10 +10,16 @@ class MergeCommand extends Command {
   final description = "Include text files in markdown files.";
 
   MergeCommand() {
-    argParser.addOption('input', abbr: 'i', defaultsTo: '.');
-    argParser.addOption('output', abbr: 'o', defaultsTo: 'mdmerge');
-    argParser.addOption('suffix', abbr: 's', defaultsTo: '.md');
-    argParser.addFlag('dry-run', defaultsTo: false);
+    argParser.addOption('input',
+        abbr: 'i', defaultsTo: '.', help: 'Director or file');
+    argParser.addOption('output',
+        abbr: 'o',
+        defaultsTo: '',
+        help: 'If not empty, write markdown files into this directory');
+    argParser.addOption('suffix',
+        abbr: 's', defaultsTo: '.md', help: 'Scan markdown files');
+    argParser.addFlag('dry-run',
+        defaultsTo: true, help: 'Will not write resulting files');
   }
 
   // [run] may also return a Future.
@@ -47,43 +54,61 @@ work(
   int includeFileCount = 0;
   int includeStatementCount = 0;
   int includeStatementFailedCount = 0;
-  final RegExp rex = RegExp(r'\[include:(.*?)\]');
-  // Do not match ourselves
-  final RegExp rexIgnore = RegExp('\\?[include:(.*?)\\?]');
 
-  getFiles(input, suffix).forEach((File fileRead) {
+  final RegExp rex =
+      RegExp('\\<include\\s+file=[\'"](.*?)[\'"]\\s*\\>.*?\\</include\\>');
+
+  getFiles(input, suffix).forEach((File fileSource) {
     allFileCount++;
-    String fileContent = fileRead.readAsStringSync();
+    String fileSourceContent = fileSource.readAsStringSync();
 
-    _log(fileRead.path);
+    _log(fileSource.path);
 
-    if (rex.hasMatch(fileContent)) {
+    if (rex.hasMatch(fileSourceContent)) {
       bool isFileChanged = false;
       includeFileCount++;
-      rex.allMatches(fileContent).forEach((match) {
+
+      rex.allMatches(fileSourceContent).forEach((match) {
         final includeStatement = match[0]!;
         final includeFilePath = match[1]!.trim();
 
-        if (rexIgnore.hasMatch(includeStatement)) {
-          // _log('  ignoring own basic pattern');
+        if (rex.pattern == includeStatement) {
+          _log('  ignoring own basic pattern');
         } else {
-          final File? includeFile = findFile(includeFilePath, fileRead.parent);
+          final File? includeFile =
+              findFile(includeFilePath, fileSource.parent);
 
           if (includeFile != null) {
             includeStatementCount++;
             final includeContent = includeFile.readAsStringSync();
-            fileContent =
-                fileContent.replaceAll(includeStatement, includeContent);
+
+            String prefix = '';
+            String postfix = '';
+            String ext = includeFile.uri.pathSegments.last.split('.').last;
+
+            switch (ext) {
+              case 'dart':
+                prefix = '\n\n```dart\n';
+                postfix = '```\n';
+              case 'js':
+                prefix = '\n\n```javascript\n';
+                postfix = '```\n';
+              default:
+            }
+
+            fileSourceContent = fileSourceContent.replaceAll(includeStatement,
+                '<include file="$includeFilePath">$prefix$includeContent$postfix</include>');
+
             isFileChanged = true;
             _log('  including $includeFilePath');
           } else {
             includeStatementFailedCount++;
-            _log('  included not found: $includeStatement      FAILED');
+            _log('  included not found: $includeFilePath      FAILED');
           }
         }
       });
       if (isFileChanged) {
-        writeProtected(fileRead, fileContent, isDryRun, suffix, output);
+        writeProtected(fileSource, fileSourceContent, isDryRun, suffix, output);
       }
     } else {
       _log('  no include found');
@@ -133,21 +158,26 @@ File? findFile(String includeFilePath, Directory currentFileDir) {
 
 void writeProtected(
     File file, String contents, bool isDryRun, String suffix, String output) {
+  // final prefix = '<include file="${contentsFile}">@@@</include>';
+
   String action = 'writing';
 
+  output = output.isEmpty ? '.' : output;
+
   final dir = Directory('$output${Platform.pathSeparator}${file.parent.path}');
-  dir.createSync(recursive: true);
+  if (isDryRun == false) {
+    dir.createSync(recursive: true);
+  }
 
   final outFile =
       File(dir.path + Platform.pathSeparator + file.uri.pathSegments.last);
 
   if (isDryRun == false) {
     _log('  $action ${outFile.path}');
-    outFile.writeAsStringSync(contents);
+    outFile.writeAsStringSync(contents, mode: FileMode.writeOnly);
   } else {
     _log('  $action ${outFile.path} (simulated)');
   }
 }
 
-// void _log(String message) => log(message, name: 'markdown merge');
 void _log(String message) => print(message);

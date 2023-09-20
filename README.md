@@ -1,13 +1,23 @@
-Use placeholders in markdown files to include other markdown, text or source files.
+Use placeholders in Markdown files to include other Markdown, text, or source files.
 
-This is a command line application, detecting include patterns in `.md` files and replacing the content accordingly. 
+Placeholder statements are either (a) relative to the current Markdown file or (b) relative to the current working directory. Dart files are wrapped in code--dart-markdown.
 
-Paths may be relative to the current `.md` file or reference the current working directory:
+**Updating exitsting Markdown files**
 
-```md
-[include:child.md]
+The resulting files are either (a) copied to an `output` directory or (b) overwrite the existing Markdown files in place. In the latter case, make a backup before running, things can go wrong.
 
-[include:./example/example.dart]
+Updating / overwriting Markdown files preserves the placeholder. Thus, updating / overwriting of already overwritten Markdown files can be repeated.
+
+```markdown
+# Markdown file 
+
+## Include Markdown file
+
+<include file="child.md"></include>
+
+## Include dart file
+
+<include file="lib/mdmerge.dart"></include>
 ```
 
 # Installation 
@@ -18,21 +28,11 @@ Activate:
 dart pub global activate mdmerge
 ```
 
-Run:
-
-```shell
-dart run mdmerge include  --input <DIR> --output <DIR>
-```
-
-Or include the package as a dev dependency:
-
-```shell
-dart pub add dev:mdmerge
-```
-
 # Usage
 
-By default all `.md` files will be checked for included text files:
+Per default Markdown files in `input` will be checked for placeholder. If `output` is not specified the source Markdown files will be updated with the referenced content.
+
+Thus, `--dry-run` is the default, it will **simulate** updates only. 
 
 ```shell
 dart run mdmerge include
@@ -45,18 +45,24 @@ dart run mdmerge include --input <FILE> --output <DIR>
 ```
 dart run mdmerge include --help
 
+Include text files in markdown files.
+
 Usage: mdmerge include [arguments]
 -h, --help            Print this usage information.
--i, --input           (defaults to ".")
--o, --output          (defaults to "mdmerge")
--s, --suffix          (defaults to ".md")
-    --[no-]dry-run
+-i, --input           Director or file
+                      (defaults to ".")
+-o, --output          If not empty, write Markdown files into this directory
+                      (defaults to "")
+-s, --suffix          Scan Markdown files
+                      (defaults to ".md")
+    --[no-]dry-run    Will not write resulting files
 ```
 
 # Information
 
-This package has been written *of the cuff*.
+This package has been written *off the cuff*, make a backup before using it.
 
 ## TODO
 
 - Encapsulate logic in a class.
+- Tests.
