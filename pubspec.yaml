@@ -1,6 +1,6 @@
 name: mdmerge
 description: Use placeholders in markdown files to include other markdown, text or source files.
-version: 1.1.0+1
+version: 1.1.1
 repository: https://github.com/xErik/mdmerge
 issues: https://github.com/xErik/mdmerge/issues
 

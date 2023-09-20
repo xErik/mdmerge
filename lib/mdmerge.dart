@@ -56,7 +56,9 @@ work(
   int includeStatementFailedCount = 0;
 
   final RegExp rex =
-      RegExp('\\<include\\s+file=[\'"](.*?)[\'"]\\s*\\>.*?\\</include\\>');
+      RegExp(r'\<include\s+file="(.*?)"\s*\>[\S\s]*?\<\/include\>');
+  String ignoreSelf =
+      r'<include file="$includeFilePath">$prefix$includeContent$postfix</include>';
 
   getFiles(input, suffix).forEach((File fileSource) {
     allFileCount++;
@@ -72,7 +74,7 @@ work(
         final includeStatement = match[0]!;
         final includeFilePath = match[1]!.trim();
 
-        if (rex.pattern == includeStatement) {
+        if (ignoreSelf == includeStatement) {
           _log('  ignoring own basic pattern');
         } else {
           final File? includeFile =
@@ -158,8 +160,6 @@ File? findFile(String includeFilePath, Directory currentFileDir) {
 
 void writeProtected(
     File file, String contents, bool isDryRun, String suffix, String output) {
-  // final prefix = '<include file="${contentsFile}">@@@</include>';
-
   String action = 'writing';
 
   output = output.isEmpty ? '.' : output;
