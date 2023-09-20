@@ -26,17 +26,17 @@ Add these placeholders to markdown files, the comment tags require three (!) das
 Dry-run is on per default, will run simulation only:
 
 ```shell
-dart run mdmerge include --input <DIR> 
+dart pub global run mdmerge include --input <DIR> 
 ```
 
 Write to output directory: 
 
 ```shell
-dart run mdmerge include --input <DIR> --output <DIR> --no-dry-run
+dart pub global run mdmerge include --input <DIR> --output <DIR> --no-dry-run
 ```
 
 Overwrite source files (potentially destructive, make a backup): 
 
 ```shell
-dart run mdmerge include --input <DIR> --no-dry-run
+dart pub global run mdmerge include --input <DIR> --no-dry-run
 ```

@@ -28,22 +28,36 @@ Activate:
 dart pub global activate mdmerge
 ```
 
+Or add as dependency:
+
+```shell
+dart pub add dev:mdmerge
+```
+
 # Usage
 
 Per default Markdown files in `input` will be checked for placeholder. If `output` is not specified the source Markdown files will be updated with the referenced content.
 
 Thus, `--dry-run` is the default, it will **simulate** updates only. 
 
+Installed as a dev-dependency, run `mdmerge` as follows:
+
 ```shell
-dart run mdmerge include
+dart run mdmerge include < ... PARAMS ... >
+```
 
-dart run mdmerge include --input <DIR> --output <DIR>
+Installed globally, run `mdmerge` as follow:
 
-dart run mdmerge include --input <FILE> --output <DIR>
+```shell
+dart pub global run mdmerge include
+
+dart pub global run mdmerge include --input <DIR> --output <DIR>
+
+dart pub global run mdmerge include --input <FILE> --output <DIR>
 ```
 
 ```
-dart run mdmerge include --help
+dart pub global run mdmerge include --help
 
 Include text files in markdown files.
 
